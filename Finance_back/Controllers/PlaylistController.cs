@@ -17,26 +17,27 @@ namespace Finance_back.Controllers
         }
 
         [HttpGet]
-        public async Task<List<Playlist>> Get() { 
+        public async Task<List<User>> Get() { 
             return await _mongoDBService.GetAsync();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] Playlist playlist) {
+        public async Task<IActionResult> Post([FromBody] User playlist) {
             await _mongoDBService.CreateAsync(playlist);
             return CreatedAtAction(nameof(Get), new { id = playlist.Id }, playlist);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> AddToPlaylist(string id, [FromBody] string movieId) {
-            await _mongoDBService.AddToPlaylistAsync(id, movieId);
-            return NoContent();
-        }
+        //[HttpPut]
+        //public async Task<IActionResult> AddToPlaylist(string id, [FromBody] string movieId)
+        //{
+        //    await _mongoDBService.AddToPlaylistAsync(id, movieId);
+        //    return NoContent();
+        //}
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id) {
-            await _mongoDBService.DeleteAsync(id);
-            return NoContent();
-        }
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> Delete(string id) {
+        //    await _mongoDBService.DeleteAsync(id);
+        //    return NoContent();
+        //}
     }
 }
