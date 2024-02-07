@@ -36,20 +36,23 @@ namespace Finance_back.Services
             User user = await _userCollection.Find(filter).FirstOrDefaultAsync();
             return user;
         }
+        public async Task<User> UpdateUser(User updatedUser)
+        {
+            var filter = Builders<User>.Filter.Eq(u => u.Id, updatedUser.Id);
+            var result = await _userCollection.ReplaceOneAsync(filter, updatedUser);
 
-        //public async Task AddToPlaylistAsync(string id, string movieId)
-        //{
-        //    FilterDefinition<Playlist> filter = Builders<Playlist>.Filter.Eq("Id", id);
-        //    UpdateDefinition<Playlist> update = Builders<Playlist>.Update.AddToSet<string>("items", movieId);
-        //    await _playlistCollection.UpdateOneAsync(filter, update);
-        //    return;
-        //}
+            if (result.IsAcknowledged && result.ModifiedCount > 0)
+            {
+                return updatedUser;
+            }
+            return null;
+        }
 
-        //public async Task DeleteAsync(string id)
-        //{
-        //    FilterDefinition<Playlist> filter = Builders<Playlist>.Filter.Eq("Id", id);
-        //    await _playlistCollection.DeleteOneAsync(filter);
-        //    return;
-        //}
+        public async Task DeleteAsync(string id)
+        {
+            FilterDefinition<User> filter = Builders<User>.Filter.Eq("Id", id);
+            await _userCollection.DeleteOneAsync(filter);
+            return;
+        }
     }
 }

@@ -40,5 +40,25 @@ namespace Finance_back.Controllers
 
             return Ok(user);
         }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutUser(string id, [FromBody] User updatedUser)
+        {
+            updatedUser.Id = id; // Ensure the updatedUser has the correct Id
+
+            var updatedUserResult = await _mongoDBService.UpdateUser(updatedUser);
+
+            if (updatedUserResult != null)
+            {
+                return Ok(updatedUserResult);
+            }
+
+            return NotFound(); // Handle the case where the user was not found or no modifications were made
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            await _mongoDBService.DeleteAsync(id);
+            return NoContent();
+        }
     }
 }
