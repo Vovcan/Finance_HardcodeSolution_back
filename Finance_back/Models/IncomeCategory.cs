@@ -9,7 +9,7 @@ namespace Finance_back.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
         public string Name { get; set; }
-        public int Sum { get; set; }
+        public int? Sum { get; set; }
         [BsonRepresentation(BsonType.ObjectId)]
         public string? UserId { get; set; }
 

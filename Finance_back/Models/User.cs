@@ -8,15 +8,15 @@ namespace Finance_back.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
-        public string Name { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string Pin { get; set; }
+        public string? Name { get; set; }
+        public string? Email { get; set; }
+        public string? Password { get; set; }
+        public string? Pin { get; set; }
         [BsonElement("CreatedAt")]
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
-        public DateTime CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
         [BsonElement("LastUpdatedAt")]
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
-        public DateTime LastUpdatedAt { get; set;}
+        public DateTime? LastUpdatedAt { get; set;}
     }
 }
