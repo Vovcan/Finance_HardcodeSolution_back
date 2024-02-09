@@ -10,7 +10,6 @@ namespace Finance_back.Controllers
     public class IncomeCategoryController : Controller
     {
         private readonly MongoDBService _mongoDBService;
-
         public IncomeCategoryController(IOptions<MongoDBSettings> mongoDBSettings)
         {
             _mongoDBService = new MongoDBService(mongoDBSettings);
@@ -39,7 +38,7 @@ namespace Finance_back.Controllers
             return Ok(_incomeCategory);
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(string id, [FromBody] IncomeCategory updatedIncomeCategory)
+        public async Task<IActionResult> PutIncomeCategory(string id, [FromBody] IncomeCategory updatedIncomeCategory)
         {
             if (updatedIncomeCategory == null)
             {
@@ -61,7 +60,7 @@ namespace Finance_back.Controllers
             return Ok(updatedUserResult);
         }
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> DeleteIncomeCategory(string id)
         {
             await _mongoDBService.DeleteIncomeCategoryAsync(id);
             return NoContent();
