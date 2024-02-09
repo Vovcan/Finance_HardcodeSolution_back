@@ -11,7 +11,7 @@ namespace Finance_back.Models
         public string Name { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
-        public string pin { get; set; }
+        public string Pin { get; set; }
         [BsonElement("CreatedAt")]
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime CreatedAt { get; set; }

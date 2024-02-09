@@ -2,18 +2,19 @@
 using Finance_back.Models;
 using Finance_back.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Finance_back.Controllers
 {
     [Controller]
-    [Route("/")]
+    [Route("/user")]
     public class UserController : Controller
     {
         private readonly MongoDBService _mongoDBService;
 
-        public UserController(MongoDBService mongoDBService)
+        public UserController(IOptions<MongoDBSettings> mongoDBSettings)
         {
-            _mongoDBService = mongoDBService;
+            _mongoDBService = new MongoDBService(mongoDBSettings);
         }
 
 

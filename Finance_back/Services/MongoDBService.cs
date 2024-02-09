@@ -9,12 +9,14 @@ namespace Finance_back.Services
     public class MongoDBService
     {
         private readonly IMongoCollection<User> _userCollection;
+        private readonly IMongoCollection<IncomeCategory> _IncomeCategoryCollection;
         //conect to database
         public MongoDBService(IOptions<MongoDBSettings> mongoDBSettings)
         {
             MongoClient client = new MongoClient(mongoDBSettings.Value.ConnectionURI);
             IMongoDatabase database = client.GetDatabase(mongoDBSettings.Value.DatabaseName);
-            _userCollection = database.GetCollection<User>(mongoDBSettings.Value.CollectionName);
+            _userCollection = database.GetCollection<User>("users");
+            _IncomeCategoryCollection = database.GetCollection<IncomeCategory>("IncomeCategorys");
         }
         //create new user
         public async Task CreateAsync(User user)
@@ -53,6 +55,18 @@ namespace Finance_back.Services
             FilterDefinition<User> filter = Builders<User>.Filter.Eq("Id", id);
             await _userCollection.DeleteOneAsync(filter);
             return;
+        }
+
+
+        public async Task CreateIncomeCategory(IncomeCategory incomeCategory)
+        {
+            await _IncomeCategoryCollection.InsertOneAsync(incomeCategory);
+            return;
+        }
+
+        public async Task<List<IncomeCategory>> GetAsyn()
+        {
+            return await _IncomeCategoryCollection.Find(new BsonDocument()).ToListAsync();
         }
     }
 }
