@@ -23,6 +23,8 @@ namespace Finance_back.Controllers
         public async Task<IActionResult> Post([FromBody] Income _income)
         {
             await _mongoDBService.CreateIncomeAsync(_income);
+            IncomeCategory a = await _mongoDBService.FindIncomeCategoryByIdAsync(_income.IncomeCategory);
+            var updatedUserResult = await _mongoDBService.UpdateSumIncomeCategoryAsync(a, _income.Amount);
             return CreatedAtAction(nameof(Get), new { id = _income.Id }, _income);
         }
         [HttpGet("{id}")]
@@ -48,15 +50,12 @@ namespace Finance_back.Controllers
             updatedIncome.Id = id; // Ensure the updatedUser has the correct Id
 
             var existingIncome = await _mongoDBService.FindIncomeByIdAsync(id);
-
             if (existingIncome == null)
             {
                 return NotFound(); // Handle the case where the user was not found
             }
-
             // Use a method to update only the non-null properties
             var updatedUserResult = await _mongoDBService.UpdateIncomeAsync(existingIncome, updatedIncome);
-
             return Ok(updatedUserResult);
         }
         [HttpDelete("{id}")]

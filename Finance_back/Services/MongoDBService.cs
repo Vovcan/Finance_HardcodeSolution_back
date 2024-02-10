@@ -1,4 +1,5 @@
 ﻿using Finance_back.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -72,6 +73,7 @@ namespace Finance_back.Services
          //-----  IncomeCategory Functions
         public async Task CreateIncomeCategoryAsync(IncomeCategory incomeCategory)
         {
+            incomeCategory.Sum = 0;
             await _IncomeCategoryCollection.InsertOneAsync(incomeCategory);
             return;
         }
@@ -82,8 +84,8 @@ namespace Finance_back.Services
         public async Task<IncomeCategory> FindIncomeCategoryByIdAsync(string id)
         {
             FilterDefinition<IncomeCategory> filter = Builders<IncomeCategory>.Filter.Eq("Id", id);
-            IncomeCategory user = await _IncomeCategoryCollection.Find(filter).FirstOrDefaultAsync();
-            return user;
+            IncomeCategory _incomeCategory = await _IncomeCategoryCollection.Find(filter).FirstOrDefaultAsync();
+            return _incomeCategory;
         }
         public async Task<IncomeCategory> UpdateIncomeCategoryAsync(IncomeCategory existingIncomeCategory, IncomeCategory updatedIncomeCategory)
         {
@@ -92,8 +94,28 @@ namespace Finance_back.Services
             // Use a projection to get only the non-null properties from updatedUser
             var updateDefinition = Builders<IncomeCategory>.Update
                 .Set(u => u.Name, updatedIncomeCategory.Name ?? existingIncomeCategory.Name)
-                .Set(u => u.Sum, updatedIncomeCategory.Sum ?? existingIncomeCategory.Sum)
                 .Set(u => u.UserId, updatedIncomeCategory.UserId ?? existingIncomeCategory.UserId);
+            // Add similar lines for other properties
+
+            var result = await _IncomeCategoryCollection.UpdateOneAsync(filter, updateDefinition);
+
+            if (result.IsAcknowledged && result.ModifiedCount > 0)
+            {
+                return existingIncomeCategory;
+            }
+            return null;
+        }
+
+        public async Task<IncomeCategory> UpdateSumIncomeCategoryAsync(IncomeCategory existingIncomeCategory, int? _sum)
+        {
+            var filter = Builders<IncomeCategory>.Filter.Eq(u => u.Id, existingIncomeCategory.Id);
+            _sum += existingIncomeCategory.Sum;
+            // Use a projection to get only the non-null properties from updatedUser
+            var updateDefinition = Builders<IncomeCategory>.Update
+                .Set(u => u.Id, existingIncomeCategory.Id)
+                .Set(u => u.Name, existingIncomeCategory.Name)
+                .Set(u => u.Sum, _sum)
+                .Set(u => u.UserId, existingIncomeCategory.UserId);
             // Add similar lines for other properties
 
             var result = await _IncomeCategoryCollection.UpdateOneAsync(filter, updateDefinition);
@@ -157,6 +179,7 @@ namespace Finance_back.Services
         //-----  ExpenseCategory Functions
         public async Task CreateExpenseCategoryAsync(ExpenseCategory expenseCategory)
         {
+            expenseCategory.Sum = 0;
             await _ExpenseCategoryCollection.InsertOneAsync(expenseCategory);
             return;
         }
@@ -177,7 +200,6 @@ namespace Finance_back.Services
             // Use a projection to get only the non-null properties from updatedUser
             var updateDefinition = Builders<ExpenseCategory>.Update
                 .Set(u => u.Name, updatedIncomeCategory.Name ?? existingIncomeCategory.Name)
-                .Set(u => u.Sum, updatedIncomeCategory.Sum ?? existingIncomeCategory.Sum)
                 .Set(u => u.UserId, updatedIncomeCategory.UserId ?? existingIncomeCategory.UserId);
             // Add similar lines for other properties
 
