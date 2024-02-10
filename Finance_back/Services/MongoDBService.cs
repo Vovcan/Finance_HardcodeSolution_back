@@ -11,6 +11,8 @@ namespace Finance_back.Services
         private readonly IMongoCollection<User> _userCollection;
         private readonly IMongoCollection<IncomeCategory> _IncomeCategoryCollection;
         private readonly IMongoCollection<Income> _IncomeCollection;
+        private readonly IMongoCollection<ExpenseCategory> _ExpenseCategoryCollection;
+        private readonly IMongoCollection<Expense> _ExpenseCollection;
         //conect to database
         public MongoDBService(IOptions<MongoDBSettings> mongoDBSettings)
         {
@@ -19,6 +21,8 @@ namespace Finance_back.Services
             _userCollection = database.GetCollection<User>("users");
             _IncomeCategoryCollection = database.GetCollection<IncomeCategory>("IncomeCategorys");
             _IncomeCollection = database.GetCollection<Income>("Incomes");
+            _ExpenseCategoryCollection = database.GetCollection<ExpenseCategory>("ExpenseCategory");
+            _ExpenseCollection = database.GetCollection<Expense>("Expense");
         }
         // -----  User Functions
         public async Task CreateUserAsync(User user)
@@ -150,6 +154,89 @@ namespace Finance_back.Services
             return;
         }
 
+        //-----  ExpenseCategory Functions
+        public async Task CreateExpenseCategoryAsync(ExpenseCategory expenseCategory)
+        {
+            await _ExpenseCategoryCollection.InsertOneAsync(expenseCategory);
+            return;
+        }
+        public async Task<List<ExpenseCategory>> GetExpenseCategoryAsync()
+        {
+            return await _ExpenseCategoryCollection.Find(new BsonDocument()).ToListAsync();
+        }
+        public async Task<ExpenseCategory> FindExpenseCategoryByIdAsync(string id)
+        {
+            FilterDefinition<ExpenseCategory> filter = Builders<ExpenseCategory>.Filter.Eq("Id", id);
+            ExpenseCategory user = await _ExpenseCategoryCollection.Find(filter).FirstOrDefaultAsync();
+            return user;
+        }
+        public async Task<ExpenseCategory> UpdateExpenseCategoryAsync(ExpenseCategory existingIncomeCategory, ExpenseCategory updatedIncomeCategory)
+        {
+            var filter = Builders<ExpenseCategory>.Filter.Eq(u => u.Id, existingIncomeCategory.Id);
 
+            // Use a projection to get only the non-null properties from updatedUser
+            var updateDefinition = Builders<ExpenseCategory>.Update
+                .Set(u => u.Name, updatedIncomeCategory.Name ?? existingIncomeCategory.Name)
+                .Set(u => u.Sum, updatedIncomeCategory.Sum ?? existingIncomeCategory.Sum)
+                .Set(u => u.UserId, updatedIncomeCategory.UserId ?? existingIncomeCategory.UserId);
+            // Add similar lines for other properties
+
+            var result = await _ExpenseCategoryCollection.UpdateOneAsync(filter, updateDefinition);
+
+            if (result.IsAcknowledged && result.ModifiedCount > 0)
+            {
+                return existingIncomeCategory;
+            }
+            return null;
+        }
+        public async Task DeleteExpenseCategoryAsync(string id)
+        {
+            FilterDefinition<ExpenseCategory> filter = Builders<ExpenseCategory>.Filter.Eq("Id", id);
+            await _ExpenseCategoryCollection.DeleteOneAsync(filter);
+            return;
+        }
+
+        // -----  Expense Functions
+        public async Task CreateExpenseAsync(Expense expense)
+        {
+            await _ExpenseCollection.InsertOneAsync(expense);
+            return;
+        }
+        public async Task<List<Expense>> GetExpenseAsync()
+        {
+            return await _ExpenseCollection.Find(new BsonDocument()).ToListAsync();
+        }
+        public async Task<Expense> FindExpenseByIdAsync(string id)
+        {
+            FilterDefinition<Expense> filter = Builders<Expense>.Filter.Eq("Id", id);
+            Expense user = await _ExpenseCollection.Find(filter).FirstOrDefaultAsync();
+            return user;
+        }
+        public async Task<Expense> UpdateExpenseAsync(Expense existingIncome, Expense updatedIncome)
+        {
+            var filter = Builders<Expense>.Filter.Eq(u => u.Id, existingIncome.Id);
+
+            // Use a projection to get only the non-null properties from updatedUser
+            var updateDefinition = Builders<Expense>.Update
+                .Set(u => u.Name, updatedIncome.Name ?? existingIncome.Name)
+                .Set(u => u.Amount, updatedIncome.Amount ?? existingIncome.Amount)
+                .Set(u => u.ExpenseCategory, updatedIncome.ExpenseCategory ?? existingIncome.ExpenseCategory)
+                .Set(u => u.UserId, updatedIncome.UserId ?? existingIncome.UserId);
+            // Add similar lines for other properties
+
+            var result = await _ExpenseCollection.UpdateOneAsync(filter, updateDefinition);
+
+            if (result.IsAcknowledged && result.ModifiedCount > 0)
+            {
+                return existingIncome;
+            }
+            return null;
+        }
+        public async Task DeleteExpenseAsync(string id)
+        {
+            FilterDefinition<Expense> filter = Builders<Expense>.Filter.Eq("Id", id);
+            await _ExpenseCollection.DeleteOneAsync(filter);
+            return;
+        }
     }
 }
