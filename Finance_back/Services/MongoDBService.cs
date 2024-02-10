@@ -106,24 +106,30 @@ namespace Finance_back.Services
             return null;
         }
 
-        public async Task<IncomeCategory> UpdateSumIncomeCategoryAsync(IncomeCategory existingIncomeCategory, int? _sum)
+        public async Task<IncomeCategory> UpdateSumIncomeCategoryAsync(IncomeCategory existingIncomeCategory)
         {
-            var filter = Builders<IncomeCategory>.Filter.Eq(u => u.Id, existingIncomeCategory.Id);
-            _sum += existingIncomeCategory.Sum;
+
+            // Фільтруємо всі записи Income, де IncomeCategory дорівнює вказаному categoryId
+            var filter = Builders<Income>.Filter.Eq(x => x.IncomeCategory, existingIncomeCategory.Id);
+
+            // Вибираємо поле Amount для всіх відфільтрованих записів
+            var projection = Builders<Income>.Projection.Expression(x => x.Amount);
+
+            // Використовуємо LINQ для обчислення суми
+            var totalAmount = _IncomeCollection.Find(filter).Project(projection).ToEnumerable().Sum();
+
+            var _filter = Builders<IncomeCategory>.Filter.Eq(u => u.Id, existingIncomeCategory.Id);
+
             // Use a projection to get only the non-null properties from updatedUser
             var updateDefinition = Builders<IncomeCategory>.Update
-                .Set(u => u.Id, existingIncomeCategory.Id)
-                .Set(u => u.Name, existingIncomeCategory.Name)
-                .Set(u => u.Sum, _sum)
+                .Set(u => u.Id,  existingIncomeCategory.Id)
+                .Set(u => u.Name,  existingIncomeCategory.UserId)
+                .Set(u => u.Sum, totalAmount)
                 .Set(u => u.UserId, existingIncomeCategory.UserId);
             // Add similar lines for other properties
 
-            var result = await _IncomeCategoryCollection.UpdateOneAsync(filter, updateDefinition);
+            var result = await _IncomeCategoryCollection.UpdateOneAsync(_filter, updateDefinition);
 
-            if (result.IsAcknowledged && result.ModifiedCount > 0)
-            {
-                return existingIncomeCategory;
-            }
             return null;
         }
         public async Task DeleteIncomeCategoryAsync(string id)

@@ -24,7 +24,7 @@ namespace Finance_back.Controllers
         {
             await _mongoDBService.CreateIncomeAsync(_income);
             IncomeCategory a = await _mongoDBService.FindIncomeCategoryByIdAsync(_income.IncomeCategory);
-            var updatedUserResult = await _mongoDBService.UpdateSumIncomeCategoryAsync(a, _income.Amount);
+            var updatedResult = await _mongoDBService.UpdateSumIncomeCategoryAsync(a);
             return CreatedAtAction(nameof(Get), new { id = _income.Id }, _income);
         }
         [HttpGet("{id}")]
@@ -54,9 +54,12 @@ namespace Finance_back.Controllers
             {
                 return NotFound(); // Handle the case where the user was not found
             }
+
             // Use a method to update only the non-null properties
-            var updatedUserResult = await _mongoDBService.UpdateIncomeAsync(existingIncome, updatedIncome);
-            return Ok(updatedUserResult);
+            var updatedIncomeResult = await _mongoDBService.UpdateIncomeAsync(existingIncome, updatedIncome);
+            IncomeCategory a = await _mongoDBService.FindIncomeCategoryByIdAsync(updatedIncomeResult.IncomeCategory);
+            var updatedResult = await _mongoDBService.UpdateSumIncomeCategoryAsync(a);
+            return Ok(updatedIncomeResult);
         }
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteIncome(string id)
