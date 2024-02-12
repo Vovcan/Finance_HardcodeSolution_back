@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace Finance_back.Controllers
 {
     [Controller]
-    [Route("/user")]
+    [Route("/users")]
     public class UserController : Controller
     {
         private readonly MongoDBService _mongoDBService;

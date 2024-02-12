@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 namespace Finance_back.Controllers
 {
     [Controller]
-    [Route("/expense")]
+    [Route("/expenses")]
     public class ExpenseController : Controller
     {
         private readonly MongoDBService _mongoDBService;
@@ -23,6 +23,8 @@ namespace Finance_back.Controllers
         public async Task<IActionResult> Post([FromBody] Expense _expense)
         {
             await _mongoDBService.CreateExpenseAsync(_expense);
+            ExpenseCategory a = await _mongoDBService.FindExpenseCategoryByIdAsync(_expense.ExpenseCategory);
+            var updatedResult = await _mongoDBService.UpdateSumExpenseCategoryAsync(a);
             return CreatedAtAction(nameof(Get), new { id = _expense.Id }, _expense);
         }
         [HttpGet("{id}")]
@@ -56,7 +58,8 @@ namespace Finance_back.Controllers
 
             // Use a method to update only the non-null properties
             var updatedUserResult = await _mongoDBService.UpdateExpenseAsync(existingExpense, updatedExpense);
-
+            ExpenseCategory a = await _mongoDBService.FindExpenseCategoryByIdAsync(updatedUserResult.ExpenseCategory);
+            var updatedResult = await _mongoDBService.UpdateSumExpenseCategoryAsync(a);
             return Ok(updatedUserResult);
         }
         [HttpDelete("{id}")]

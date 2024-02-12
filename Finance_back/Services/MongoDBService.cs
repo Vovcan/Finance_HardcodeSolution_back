@@ -14,7 +14,8 @@ namespace Finance_back.Services
         private readonly IMongoCollection<Income> _IncomeCollection;
         private readonly IMongoCollection<ExpenseCategory> _ExpenseCategoryCollection;
         private readonly IMongoCollection<Expense> _ExpenseCollection;
-        //conect to database
+        private readonly IMongoCollection<Reminder> _ReminderCollection;
+        //connection to database
         public MongoDBService(IOptions<MongoDBSettings> mongoDBSettings)
         {
             MongoClient client = new MongoClient(mongoDBSettings.Value.ConnectionURI);
@@ -24,6 +25,7 @@ namespace Finance_back.Services
             _IncomeCollection = database.GetCollection<Income>("Incomes");
             _ExpenseCategoryCollection = database.GetCollection<ExpenseCategory>("ExpenseCategory");
             _ExpenseCollection = database.GetCollection<Expense>("Expense");
+            _ReminderCollection = database.GetCollection<Reminder>("Reminder");
         }
         // -----  User Functions
         public async Task CreateUserAsync(User user)
@@ -69,7 +71,6 @@ namespace Finance_back.Services
             return;
         }
 
-
          //-----  IncomeCategory Functions
         public async Task CreateIncomeCategoryAsync(IncomeCategory incomeCategory)
         {
@@ -105,7 +106,6 @@ namespace Finance_back.Services
             }
             return null;
         }
-
         public async Task<IncomeCategory> UpdateSumIncomeCategoryAsync(IncomeCategory existingIncomeCategory)
         {
 
@@ -223,6 +223,32 @@ namespace Finance_back.Services
             await _ExpenseCategoryCollection.DeleteOneAsync(filter);
             return;
         }
+        public async Task<ExpenseCategory> UpdateSumExpenseCategoryAsync(ExpenseCategory existingExpenseCategory)
+        {
+
+            // Фільтруємо всі записи Income, де IncomeCategory дорівнює вказаному categoryId
+            var filter = Builders<Expense>.Filter.Eq(x => x.ExpenseCategory, existingExpenseCategory.Id);
+
+            // Вибираємо поле Amount для всіх відфільтрованих записів
+            var projection = Builders<Expense>.Projection.Expression(x => x.Amount);
+
+            // Використовуємо LINQ для обчислення суми
+            var totalAmount = _ExpenseCollection.Find(filter).Project(projection).ToEnumerable().Sum();
+
+            var _filter = Builders<ExpenseCategory>.Filter.Eq(u => u.Id, existingExpenseCategory.Id);
+
+            // Use a projection to get only the non-null properties from updatedUser
+            var updateDefinition = Builders<ExpenseCategory>.Update
+                .Set(u => u.Id, existingExpenseCategory.Id)
+                .Set(u => u.Name, existingExpenseCategory.UserId)
+                .Set(u => u.Sum, totalAmount)
+                .Set(u => u.UserId, existingExpenseCategory.UserId);
+            // Add similar lines for other properties
+
+            var result = await _ExpenseCategoryCollection.UpdateOneAsync(_filter, updateDefinition);
+
+            return null;
+        }
 
         // -----  Expense Functions
         public async Task CreateExpenseAsync(Expense expense)
@@ -266,5 +292,17 @@ namespace Finance_back.Services
             await _ExpenseCollection.DeleteOneAsync(filter);
             return;
         }
+
+        // -----  Reaminder Functions
+        public async Task CreateReminderAsync(Reminder reminder)
+        {
+            await _ReminderCollection.InsertOneAsync(reminder);
+            return;
+        }
+        public async Task<List<Reminder>> GetReminderAsync()
+        {
+            return await _ReminderCollection.Find(new BsonDocument()).ToListAsync();
+        }
+
     }
 }

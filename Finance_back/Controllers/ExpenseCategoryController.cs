@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 namespace Finance_back.Controllers
 {
     [Controller]
-    [Route("/expense-categorie")]
+    [Route("/expense-categories")]
     public class ExpenseCategoryController : Controller
     {
         private readonly MongoDBService _mongoDBService;
