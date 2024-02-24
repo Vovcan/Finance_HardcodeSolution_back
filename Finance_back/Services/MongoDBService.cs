@@ -1,4 +1,5 @@
-﻿using Finance_back.Models;
+﻿using System.Collections.Generic;
+using Finance_back.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
@@ -303,6 +304,59 @@ namespace Finance_back.Services
         {
             return await _ReminderCollection.Find(new BsonDocument()).ToListAsync();
         }
+        public async Task<Reminder> FindReminderByIdAsync(string id)
+        {
+            FilterDefinition<Reminder> filter = Builders<Reminder>.Filter.Eq("Id", id);
+            Reminder _reminder = await _ReminderCollection.Find(filter).FirstOrDefaultAsync();
+            return _reminder;
+        }
+        public async Task<List<Reminder>> GetRemindersForUserAsync(string UserId)
+        {
+            FilterDefinition<Reminder> filter = Builders<Reminder>.Filter.Eq("UserId", UserId);
+            List<Reminder> _reminders = await _ReminderCollection.Find(filter).ToListAsync();
+            return _reminders;
+        }
+        public async Task<Reminder> UpdateReminderAsync(Reminder existingReminder, Reminder updatedReminder)
+        {
+            var filter = Builders<Reminder>.Filter.Eq(u => u.Id, existingReminder.Id);
+
+            // Use a projection to get only the non-null properties from updatedUser
+            var updateDefinition = Builders<Reminder>.Update
+                .Set(u => u.Title, updatedReminder.Title ?? existingReminder.Title)
+                .Set(u => u.Description, updatedReminder.Description ?? existingReminder.Description)
+                .Set(u => u.DueDate, updatedReminder.DueDate ?? existingReminder.DueDate);
+            // Add similar lines for other properties
+
+            var result = await _ReminderCollection.UpdateOneAsync(filter, updateDefinition);
+
+            if (result.IsAcknowledged && result.ModifiedCount > 0)
+            {
+                return existingReminder;
+            }
+            return null;
+        }
+        public async Task DeleteReminderAsync(string id)
+        {
+            FilterDefinition<Reminder> filter = Builders<Reminder>.Filter.Eq("Id", id);
+            await _ReminderCollection.DeleteOneAsync(filter);
+            return;
+        }
+        //public async Task<List<Reminder>> GetRemindersDueNow()
+        //{
+
+        //    DateTime date;
+        //    DateTime now = DateTime.Now;
+        //    now = now.AddSeconds(-now.Second).AddMilliseconds(-now.Millisecond);
+        //    var filter = Builders<Reminder>.Filter.Empty;
+        //    var reminders = _ReminderCollection.Find(filter).ToList();
+        //    foreach (Reminder reminder in reminders )
+        //    {
+        //        date = reminder.DueDate;
+        //        date = date.AddSeconds(-yourDate.Second).AddMilliseconds(-yourDate.Millisecond);
+        //    }
+        //    return null;
+        //}
+
 
     }
 }
