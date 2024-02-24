@@ -341,21 +341,20 @@ namespace Finance_back.Services
             await _ReminderCollection.DeleteOneAsync(filter);
             return;
         }
-        //public async Task<List<Reminder>> GetRemindersDueNow()
-        //{
+        public async Task<List<Reminder>> GetRemindersDueNow()
+        {
+            DateTime now = DateTime.Now;
+            now = now.AddSeconds(-now.Second).AddMilliseconds(-now.Millisecond);
 
-        //    DateTime date;
-        //    DateTime now = DateTime.Now;
-        //    now = now.AddSeconds(-now.Second).AddMilliseconds(-now.Millisecond);
-        //    var filter = Builders<Reminder>.Filter.Empty;
-        //    var reminders = _ReminderCollection.Find(filter).ToList();
-        //    foreach (Reminder reminder in reminders )
-        //    {
-        //        date = reminder.DueDate;
-        //        date = date.AddSeconds(-yourDate.Second).AddMilliseconds(-yourDate.Millisecond);
-        //    }
-        //    return null;
-        //}
+            var filterBuilder = Builders<Reminder>.Filter;
+            var filter = filterBuilder.Lte("DueDate", now.AddMinutes(1))  // Фильтр на объекты с DueDate <= (now + 1 минута)
+                                     & filterBuilder.Gte("DueDate", now);     // и DueDate >= now
+
+            var reminders = await _ReminderCollection.Find(filter).ToListAsync();
+
+            return reminders;
+        }
+
 
 
     }
